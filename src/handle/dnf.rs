@@ -6,24 +6,27 @@ use crate::capture::Capture;
 use crate::yolo::model::SKELETON;
 use rand::Rng;
 use std::{thread, time};
+use crate::ui::debug;
+use crate::ui::debug::DebugWindow;
 // use std::ops::Sub;
 // use dirs::data_dir;
 
 pub struct Dnf {
     pub model: YOLOv8,
     pub names: Vec<String>,
+    pub debug: DebugWindow,
 }
 
 #[derive(Debug, Clone)]
 pub struct DNFYOLOResult {
     pub hero: Option<(f32, f32, f32, f32)>,
-    pub monster: Vec<(f32, f32, f32, f32)>,//怪物
-    pub equip: Vec<(f32, f32, f32, f32)>,//装备
-    pub species: Vec<(f32, f32, f32, f32)>,//金币
-    pub material: Vec<(f32, f32, f32, f32)>,//材料
-    pub boss: Vec<(f32, f32, f32, f32)>,//boss
-    pub door: Vec<(f32, f32, f32, f32)>,//门
-    pub other: Vec<(usize, f32, f32, f32, f32)>,//其他
+    pub monster: Vec<(f32, f32, f32, f32)>, //怪物
+    pub equip: Vec<(f32, f32, f32, f32)>, //装备
+    pub species: Vec<(f32, f32, f32, f32)>, //金币
+    pub material: Vec<(f32, f32, f32, f32)>, //材料
+    pub boss: Vec<(f32, f32, f32, f32)>, //boss
+    pub door: Vec<(f32, f32, f32, f32)>, //门
+    pub other: Vec<(usize, f32, f32, f32, f32)>, //其他
 }
 
 const CHARSET: &[u8] = b"asdfgqwert";
@@ -33,12 +36,13 @@ impl Dnf {
         Self {
             names: m.names().clone(),
             model: m,
+            debug: DebugWindow::new(),
         }
     }
     pub fn run(&mut self) {
         let capture_window = Windows::new();
         let operate_instruction = virtual_ddl::MouseAndKeyboardInstruct::new();
-        let mut door_num = 0;//卡门处理
+        let mut door_num = 0; //卡门处理
         let mut rng = rand::thread_rng();
         loop {
             //截图
@@ -66,24 +70,27 @@ impl Dnf {
 
                 //boss
                 if let Some((x, y)) = self.last_point(hero_x, hero_y, &result.monster) {
-                    let _ = operate_instruction.on("y");//觉醒
+                    let _ = operate_instruction.on("y"); //觉醒
                     let _ = operate_instruction.on_mov(hero_x, hero_y, x, y);
                     let random_char = CHARSET[rng.gen_range(0..CHARSET.len())] as char;
                     let _ = operate_instruction.on(&random_char.to_string());
+                    //这里虚拟化找图识别是否接受和触发捡东西一键
                     continue;
                 }
 
                 //物品
                 if result.equip.len() > 0 || result.species.len() > 0 || result.material.len() > 0 {
                     let mut data = result.equip;
-                    data.extend(result.species).extend(result.material);
+                    data.extend(result.species);
                     let _ = operate_instruction.on_mov(hero_x, hero_y, data[0].0, data[0].1 + data[0].3);
                     let _ = operate_instruction.on("x");
                     continue;
                 }
 
                 //门 下一个房间
-
+                if let Some((x, y)) = self.last_point(hero_x, hero_y, &result.monster) {
+                    let _ = operate_instruction.on_mov(hero_x, hero_y, x, y);
+                }
                 //卡住过不了图
                 if door_num > 30 {
                     door_num = 0;
@@ -149,7 +156,7 @@ impl Dnf {
                     let name = (&*self.names[bbox.id()]).into();
                     match name {
                         "hero" => {
-                            bbox.height = bbox.height + 135f32;//人物偏差 以最小为标准
+                            bbox.height = bbox.height + 135f32; //人物偏差 以最小为标准
                             result.hero = Some((bbox.xmin(), bbox.ymin(), bbox.width(), bbox.height()));
                         }
                         "monster" => {
@@ -177,8 +184,10 @@ impl Dnf {
                 }
             }
         }
-        self.model.plot_and_save(&ys, &vec![img], Some(&SKELETON));
+        self.debug(self.model.plot(&ys, &vec![img], Some(&SKELETON)));
 
         Ok(result)
     }
+    // 换角色
+
 }

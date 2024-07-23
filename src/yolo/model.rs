@@ -1,7 +1,7 @@
 #![allow(clippy::type_complexity)]
 
 use anyhow::Result;
-use image::{DynamicImage, GenericImageView, ImageBuffer};
+use image::{DynamicImage, GenericImageView, ImageBuffer, RgbImage};
 use ndarray::{s, Array, Axis, IxDyn};
 use rand::{thread_rng, Rng};
 use std::path::PathBuf;
@@ -415,12 +415,12 @@ impl YOLOv8 {
         }
     }
 
-    pub fn plot_and_save(
+    pub fn plot(
         &self,
         ys: &[YOLOResult],
         xs0: &[DynamicImage],
         skeletons: Option<&[(usize, usize)]>,
-    ) {
+    ) -> RgbImage{
         // check font then load
         let font = check_font("Arial.ttf");
         for (_idb, (img0, y)) in xs0.iter().zip(ys.iter()).enumerate() {
@@ -537,15 +537,9 @@ impl YOLOv8 {
                 }
             }
 
-            // mkdir and save
-            let mut runs = PathBuf::from("./runs");
-            if !runs.exists() {
-                std::fs::create_dir_all(&runs).unwrap();
-            }
-            runs.push(gen_time_string("-"));
-            let saveout = format!("{}.jpg", runs.to_str().unwrap());
-            let _ = img.save(saveout);
+            return  img;
         }
+         RgbImage::default()
     }
 
     pub fn summary(&self) {
