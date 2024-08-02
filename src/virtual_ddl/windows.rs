@@ -26,6 +26,12 @@ pub struct MouseAndKeyboardInstruct {
     keys: HashMap<String, i32, RandomState>,
     lib: libloading::Library,
 }
+pub enum UpOrDown {
+    Up,
+    Down,
+    DownAndUp
+}
+
 
 impl MouseAndKeyboardInstruct {
     pub fn new() -> Self {
@@ -44,35 +50,47 @@ impl MouseAndKeyboardInstruct {
             m.insert(k.to_string(), b);
         }
         unsafe {
-            let lib = libloading::Library::new("./ddhid.40616x64.dll").unwrap();
+            let lib = libloading::Library::new("./dd43390.dll").unwrap();
             let func2: libloading::Symbol<unsafe extern fn(i32) -> i32> = lib.get(b"DD_btn").unwrap();
             //lib init
             if func2(0) != 1 {
                 panic!("lib error");
             }
-            //初始化会按 win 键
-            let func: libloading::Symbol<unsafe extern fn(i32, i32) -> i32> = lib.get(b"DD_key").unwrap();
-            func(100, 1);
-            thread::sleep(time::Duration::from_millis(30));
-            func(100, 2);
+
             Self {
                 keys: m,
                 lib,
             }
         }
     }
-    pub fn on(&self, keys: &str) -> Result<(), Box<dyn Error>> {
+    pub fn on(&self, keys: &str,key_type:UpOrDown) -> Result<(), Box<dyn Error>> {
         match self.keys.get(keys) {
             Some(code) => {
                 unsafe {
                     let func: libloading::Symbol<unsafe extern fn(i32, i32) -> i32> = self.lib.get(b"DD_key").unwrap();
-                    if func(*code, 1) != 1 {
-                        return Err(Box::new(virtual_ddl::Virtual::KeyError));
+                    match  key_type{
+                        UpOrDown::Up=>{
+                            if func(*code, 2) != 1 {
+                                return Err(Box::new(virtual_ddl::Virtual::KeyError));
+                            }
+                        }
+                        UpOrDown::Down=>{
+                            if func(*code, 1) != 1 {
+                                return Err(Box::new(virtual_ddl::Virtual::KeyError));
+                            }
+                        }
+                        UpOrDown::DownAndUp=>{
+                            if func(*code, 1) != 1 {
+                                return Err(Box::new(virtual_ddl::Virtual::KeyError));
+                            }
+                            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(10..15)));
+                            if func(*code, 2) != 1 {
+                                return Err(Box::new(virtual_ddl::Virtual::KeyError));
+                            }
+                        }
                     }
-                    thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(30..58)));
-                    if func(*code, 2) != 1 {
-                        return Err(Box::new(virtual_ddl::Virtual::KeyError));
-                    }
+
+
                 }
                 Ok(())
             }
@@ -81,88 +99,29 @@ impl MouseAndKeyboardInstruct {
             }
         }
     }
-    pub fn on_mov(&self, x: f32, y: f32, to_x: f32, to_y: f32) -> Result<(), Box<dyn Error>> {
-        // ("up", 709), ("left", 710), ("down", 711), ("right", 712),
-        let mut x_code = 712;
-        let mut y_code = 711;
-        let x_mov: u64 = (x - to_x).abs() as u64;
-        let y_mov: u64 = (y - to_y).abs() as u64;
-        if x - to_x > 0f32 {
-            x_code = 710
-        }
-        if y - to_y > 0f32 {
-            y_code = 709
-        }
-        println!("{:?}", (x, y, to_x, to_y));
+    pub fn mouse_mov_click(&self, x: u32, y: u32)  {
         unsafe {
-            let func: libloading::Symbol<unsafe extern fn(i32, i32) -> i32> = self.lib.get(b"DD_key").unwrap();
-            //快速移动
-            if func(x_code, 1) != 1 {
-                return Err(Box::new(virtual_ddl::Virtual::KeyError));
-            }
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(30..50)));
-            if func(x_code, 2) != 1 {
-                return Err(Box::new(virtual_ddl::Virtual::KeyError));
-            }
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(20..50)));
-            if func(x_code, 1) != 1 {
-                return Err(Box::new(virtual_ddl::Virtual::KeyError));
-            }
+            //     fn DD_btn(btn: c_int); //鼠标点击
+            //     fn DD_mov(x: c_int, y: c_int); //鼠标绝对移动
+            let func: libloading::Symbol<unsafe extern fn(u32, u32)> = self.lib.get(b"DD_mov").unwrap();
+            func(x, y);
             thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(10..20)));
-            if func(y_code, 1) != 1 {
-                return Err(Box::new(virtual_ddl::Virtual::KeyError));
-            }
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(20..58)));
-
-            //需要速度
-            if x_mov > y_mov {
-                let s = y_mov * 3; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                if func(y_code, 2) != 1 {
-                    return Err(Box::new(virtual_ddl::Virtual::KeyError));
-                }
-            } else {
-                let s = x_mov * 2; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                if func(x_code, 2) != 1 {
-                    return Err(Box::new(virtual_ddl::Virtual::KeyError));
-                }
-            }
-
-            if x_mov > y_mov {
-                let s = (x_mov - y_mov) * 2; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                if func(x_code, 2) != 1 {
-                    return Err(Box::new(virtual_ddl::Virtual::KeyError));
-                }
-            } else {
-                let s = (y_mov - x_mov) * 3; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                if func(y_code, 2) != 1 {
-                    return Err(Box::new(virtual_ddl::Virtual::KeyError));
-                }
-            }
+            let func: libloading::Symbol<unsafe extern fn(u32)> = self.lib.get(b"DD_btn").unwrap();
+            func(1);
+            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(10..20)));
+            func(2);
         }
-        Ok(())
     }
-}
 
+}
 
 #[cfg(test)]
 mod test {
-    use crate::virtual_ddl::windows::MouseAndKeyboardInstruct;
+    use crate::virtual_ddl::windows::{MouseAndKeyboardInstruct,UpOrDown};
 
     #[test]
     fn key() {
         let w = MouseAndKeyboardInstruct::new();
-        w.on("a").unwrap()
+        w.on("a",UpOrDown::DownAndUp).unwrap()
     }
 }

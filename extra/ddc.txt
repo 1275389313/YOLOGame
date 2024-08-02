@@ -1,1 +1,0 @@
-execute ddc.exe to install/uninstll

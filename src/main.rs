@@ -3,7 +3,9 @@ use lib::yolo;
 
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    handle::dnf::Dnf::new(yolo::yolo_run()?).run();
+    let run  = handle::dnf::Dnf::new(yolo::yolo_run()?);
+
+    run.change_hero(1,1);
     // let capture_window = Windows::new();
     // let mut i=0;l
     // loop {
@@ -11,5 +13,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     i+=1;
     //     thread::sleep(time::Duration::from_secs(5));
     // }
+
+
     Ok(())
 }

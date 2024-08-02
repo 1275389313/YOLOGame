@@ -1,7 +1,5 @@
 use std::{thread, time};
-use image::DynamicImage;
 use image::io::Reader as ImageReader;
-use lib::ui;
 use lib::ui::debug;
 
 fn main() {
@@ -33,6 +31,7 @@ fn main() {
             .decode()
             .unwrap()
             ;
-        ui.show_debug_window(img.to_rgb8());}
+        ui.show_debug_window(img.to_rgb8());
+    }
     thread::sleep(time::Duration::from_secs(10));
 }

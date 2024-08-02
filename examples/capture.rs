@@ -6,19 +6,24 @@ fn main() {
     // let buf = capture_display().unwrap();
 
     let hwnd = window_list();
+    // hwnd.iter().for_each(|a|{
+    //     println!("{:?}",a)
+    // });
+    // return;
     let hwnd = window_list()
         .unwrap()
         .iter()
-        .find(|i| i.window_name=="地下城与勇士：创新世纪" )
+        .find(|i| i.window_name=="机械革命电竞控制台" )
         .unwrap()
         .hwnd;
     println!("{:?}",hwnd);
 
    let buf =  capture_window(hwnd).unwrap();
    //  // convert to image and save
-    let mut  img = DynamicImage::ImageRgba8(
-        RgbaImage::from_raw(buf.width, buf.height, buf.pixels).unwrap());
-    img.to_rgb8().save("screenshot.jpg").unwrap();
+   //  let mut  img = DynamicImage::ImageRgba8(
+   //      RgbaImage::from_raw(buf.width, buf.height, buf.pixels).unwrap());
+   //  // img.to_rgb8().save("screenshot.jpg").unwrap();
+    println!("{:?} {:?} , {:?} {:?}",buf.x,buf.y,buf.width,buf.height)
    // let data =  img.sub_image(0u32,0,800_u32,600_u32).to_image().into() as DynamicImage;
 
     // Fine tuning

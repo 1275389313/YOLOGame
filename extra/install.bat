@@ -1,3 +1,0 @@
-ddc -i
-
-pause

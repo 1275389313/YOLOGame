@@ -22,10 +22,11 @@ half = { version = "2.3.1" }
 dirs = { version = "5.0.1" }
 ureq = { version = "2.9.1" }
 
-win-screenshot = "4.0.11" #截屏
+win-screenshot = { path = "win-screenshot-main" } #截屏
 libloading = "0.8.4"#调用动态库
 thiserror = "1.0.61"
 minifb = "0.27.0"#轻量级ui窗口debug用
+device_query = "2.1.0" #简单鼠标和键盘监听
 #windows = { version = "0.58.0", features = ["Foundation_Collections", "Globalization", "Graphics_Imaging", "Media_Ocr", "Storage_Streams","Win32_System_WinRT"] }
 [lib]
 name = "lib"

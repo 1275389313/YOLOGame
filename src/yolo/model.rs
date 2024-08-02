@@ -4,7 +4,6 @@ use anyhow::Result;
 use image::{DynamicImage, GenericImageView, ImageBuffer, RgbImage};
 use ndarray::{s, Array, Axis, IxDyn};
 use rand::{thread_rng, Rng};
-use std::path::PathBuf;
 
 
 pub use super::ort_backend::*;
