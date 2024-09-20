@@ -34,7 +34,7 @@ impl super::Ocr for PaddleOcr {
 #[cfg(test)]
 mod test {
     use crate::ocr::Ocr;
-    use crate::ocr::paddleocr::PaddleOcr;
+    use crate::ocr::paddle::PaddleOcr;
 
     #[test]
     fn orc() {

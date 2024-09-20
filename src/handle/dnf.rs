@@ -112,7 +112,6 @@ impl Dnf {
                 //卡住过不了图
             }
             println!("rmf {:?}", now.sub(time::Instant::now()));
-            thread::sleep(time::Duration::from_millis(50));
         }
     }
 
