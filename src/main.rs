@@ -1,19 +1,17 @@
+use std::{thread, time};
+
 use lib::handle;
 use lib::yolo;
-
+use lib::yolo::model::OrtEP;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let run  = handle::dnf::Dnf::new(yolo::yolo_run()?);
-
-    run.change_hero(1,1);
-    // let capture_window = Windows::new();
-    // let mut i=0;l
+    println!("10秒后运行");
+    thread::sleep(time::Duration::from_secs(10));
+    let mut run = handle::dnf::Dnf::new(yolo::yolo_run("GPU")?);
+    run.mov_door();
     // loop {
-    //     capture_window.capture_now().save(format!("./runs/{:?}.png",i)).unwrap();
-    //     i+=1;
-    //     thread::sleep(time::Duration::from_secs(5));
+    //     run.pre_work();
+    //     run.run();
     // }
-
-
     Ok(())
 }

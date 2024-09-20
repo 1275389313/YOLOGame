@@ -29,7 +29,7 @@ pub struct YOLOv8 {
     names: Vec<String>,
     color_palette: Vec<(u8, u8, u8)>,
     profile: bool,
-    plot: bool,
+    // plot: bool,
 }
 
 impl YOLOv8 {
@@ -121,7 +121,7 @@ impl YOLOv8 {
             iou: 0.55, // iou threshold in NMS NMS中的iou阈值
             color_palette,
             profile: false, //check time consumed in each stage 检查每个阶段消耗的时间
-            plot: true, //plot inference result and save 绘图推理结果并保存
+            // plot: true, //plot inference result and save 绘图推理结果并保存
             nc,
             nk,
             nm,

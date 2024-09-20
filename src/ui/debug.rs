@@ -63,7 +63,7 @@ impl DebugWindow {
         }
     }
     pub fn show_debug_window(&self, img: RgbImage) {
-        let img = image::DynamicImage::from(image::imageops::resize(&img, 500, 500, image::imageops::FilterType::CatmullRom)).to_rgb8();
+        let img = image::DynamicImage::from(image::imageops::resize(&img, 640, 640, image::imageops::FilterType::CatmullRom)).to_rgb8();
         let buffer: Vec<u32> = img
             .pixels()
             .flat_map(|p| {

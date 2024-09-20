@@ -29,7 +29,7 @@ pub struct MouseAndKeyboardInstruct {
 pub enum UpOrDown {
     Up,
     Down,
-    DownAndUp
+    DownAndUp,
 }
 
 
@@ -63,34 +63,34 @@ impl MouseAndKeyboardInstruct {
             }
         }
     }
-    pub fn on(&self, keys: &str,key_type:UpOrDown) -> Result<(), Box<dyn Error>> {
+    pub fn on(&self, keys: &str, key_type: UpOrDown) -> Result<(), Box<dyn Error>> {
         match self.keys.get(keys) {
             Some(code) => {
                 unsafe {
                     let func: libloading::Symbol<unsafe extern fn(i32, i32) -> i32> = self.lib.get(b"DD_key").unwrap();
-                    match  key_type{
-                        UpOrDown::Up=>{
-                            if func(*code, 2) != 1 {
+                    match key_type {
+                        UpOrDown::Up => {
+                            if func(*code, 2) != 0 {
                                 return Err(Box::new(virtual_ddl::Virtual::KeyError));
                             }
                         }
-                        UpOrDown::Down=>{
-                            if func(*code, 1) != 1 {
+                        UpOrDown::Down => {
+                            if func(*code, 1) != 0 {
                                 return Err(Box::new(virtual_ddl::Virtual::KeyError));
                             }
                         }
-                        UpOrDown::DownAndUp=>{
-                            if func(*code, 1) != 1 {
+                        UpOrDown::DownAndUp => {
+                            if func(*code, 1) != 0 {
+                                println!("1");
                                 return Err(Box::new(virtual_ddl::Virtual::KeyError));
                             }
-                            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(10..15)));
-                            if func(*code, 2) != 1 {
+                            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(100..150)));
+                            if func(*code, 2) != 0 {
+                                println!("2");
                                 return Err(Box::new(virtual_ddl::Virtual::KeyError));
                             }
                         }
                     }
-
-
                 }
                 Ok(())
             }
@@ -99,29 +99,28 @@ impl MouseAndKeyboardInstruct {
             }
         }
     }
-    pub fn mouse_mov_click(&self, x: u32, y: u32)  {
+    pub fn mouse_mov_click(&self, x: u32, y: u32) {
         unsafe {
             //     fn DD_btn(btn: c_int); //鼠标点击
             //     fn DD_mov(x: c_int, y: c_int); //鼠标绝对移动
-            let func: libloading::Symbol<unsafe extern fn(u32, u32)> = self.lib.get(b"DD_mov").unwrap();
-            func(x, y);
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(10..20)));
-            let func: libloading::Symbol<unsafe extern fn(u32)> = self.lib.get(b"DD_btn").unwrap();
+            let func: libloading::Symbol<unsafe extern fn(i32, i32)> = self.lib.get(b"DD_mov").unwrap();
+            func(x as i32, y as i32);
+            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(100..150)));
+            let func: libloading::Symbol<unsafe extern fn(i32)> = self.lib.get(b"DD_btn").unwrap();
             func(1);
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(10..20)));
+            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(100..150)));
             func(2);
         }
     }
-
 }
 
 #[cfg(test)]
 mod test {
-    use crate::virtual_ddl::windows::{MouseAndKeyboardInstruct,UpOrDown};
+    use crate::virtual_ddl::windows::{MouseAndKeyboardInstruct, UpOrDown};
 
     #[test]
     fn key() {
         let w = MouseAndKeyboardInstruct::new();
-        w.on("a",UpOrDown::DownAndUp).unwrap()
+        w.on("a", UpOrDown::DownAndUp).unwrap()
     }
 }

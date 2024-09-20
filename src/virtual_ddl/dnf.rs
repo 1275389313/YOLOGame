@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::{thread, time};
 use rand::Rng;
-use crate::virtual_ddl;
 use crate::virtual_ddl::windows::{MouseAndKeyboardInstruct, UpOrDown};
 
 
@@ -28,43 +27,41 @@ impl DNFVirtual {
             y_code = "up"
         }
         println!("{:?}", (x, y, to_x, to_y));
-        unsafe {
-            //快速移动
-            self.key_mouse.on(x_code, UpOrDown::DownAndUp)?;
+        //快速移动
+        self.key_mouse.on(x_code, UpOrDown::DownAndUp)?;
+        self.key_mouse.on(x_code, UpOrDown::Up)?;
+        thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(50..130)));
+        self.key_mouse.on(y_code, UpOrDown::Down)?;
+        thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(50..130)));
+
+        //需要速度
+        if x_mov > y_mov {
+            let s = y_mov * 3; //需要计算实际速度
+            if s > 0 {
+                thread::sleep(time::Duration::from_millis(s));
+            }
+            self.key_mouse.on(y_code, UpOrDown::Up)?;
+        } else {
+            let s = x_mov * 2; //需要计算实际速度
+            if s > 0 {
+                thread::sleep(time::Duration::from_millis(s));
+            }
             self.key_mouse.on(x_code, UpOrDown::Up)?;
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(30..50)));
-            self.key_mouse.on(y_code, UpOrDown::Down)?;
-            thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(20..58)));
+        }
 
-            //需要速度
-            if x_mov > y_mov {
-                let s = y_mov * 3; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                self.key_mouse.on(y_code, UpOrDown::Up)?;
-            } else {
-                let s = x_mov * 2; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                self.key_mouse.on(x_code, UpOrDown::Up)?;
+        if x_mov > y_mov {
+            let s = (x_mov - y_mov) * 2; //需要计算实际速度
+            if s > 0 {
+                thread::sleep(time::Duration::from_millis(s));
             }
 
-            if x_mov > y_mov {
-                let s = (x_mov - y_mov) * 2; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-
-                self.key_mouse.on(x_code, UpOrDown::Up)?;
-            } else {
-                let s = (y_mov - x_mov) * 3; //需要计算实际速度
-                if s > 0 {
-                    thread::sleep(time::Duration::from_millis(s));
-                }
-                self.key_mouse.on(y_code, UpOrDown::Up)?;
+            self.key_mouse.on(x_code, UpOrDown::Up)?;
+        } else {
+            let s = (y_mov - x_mov) * 3; //需要计算实际速度
+            if s > 0 {
+                thread::sleep(time::Duration::from_millis(s));
             }
+            self.key_mouse.on(y_code, UpOrDown::Up)?;
         }
         Ok(())
     }
@@ -73,8 +70,13 @@ impl DNFVirtual {
         Ok(())
     }
 
+    pub fn skip(&self) -> Result<(), Box<dyn Error>> {
+        self.key_mouse.on("left", UpOrDown::Down)?;
+        self.key_mouse.on("left", UpOrDown::Up)?;
+        self.key_mouse.on("left", UpOrDown::Down)?;
+        Ok(())
+    }
     pub fn mouse_mov_click(&self, x: u32, y: u32) {
         self.key_mouse.mouse_mov_click(x, y);
     }
-
 }

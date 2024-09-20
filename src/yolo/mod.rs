@@ -5,9 +5,13 @@ mod lib;
 
 pub  use ort_backend::OrtEP as deviceType;
 
-pub fn yolo_run() -> Result<model::YOLOv8, Box<dyn std::error::Error>> {
+pub fn yolo_run(device_type:&str) -> Result<model::YOLOv8, Box<dyn std::error::Error>> {
+    let mut dt = deviceType::Cpu;
+    if let Some(_) = device_type.find("GPU") {
+        dt = deviceType::Cuda(1);
+    }
     //部分配置写死
-    let  model = model::YOLOv8::new("./best.onnx".to_string(), 0.40,deviceType::Cpu)?;
+    let  model = model::YOLOv8::new("./best.onnx".to_string(), 0.40,dt)?;
     // model.summary(); // model info
     Ok(model)
 }
@@ -33,7 +37,7 @@ mod test{
 
         // You can test `--batch 2` with this
 
-        let mut model = yolo::yolo_run()?;
+        let mut model = yolo::yolo_run("cpu")?;
 
         // 4. run
         let ys = model.run(&xs)?;
