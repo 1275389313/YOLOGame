@@ -216,26 +216,26 @@ impl Dnf {
     pub fn change_hero(&self, x: u32, y: u32) {
         println!("换角色");
         //esc-> 点击固定点位-》箭头 右箭头 -> 回车
-        _ = self.operate_instruction.on("esc");
+        let _ = self.operate_instruction.on("esc");
         thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(2000..3500)));
-        _ = self.operate_instruction.mouse_mov_click(582 + x, 755 + y);
+        let _ = self.operate_instruction.mouse_mov_click(582 + x, 755 + y);
         thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(2000..3500)));
-        _ = self.operate_instruction.on("right");
+        let _ = self.operate_instruction.on("right");
         thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(2000..3500)));
-        _ = self.operate_instruction.on("space");
+        let _ = self.operate_instruction.on("space");
     }
 
     // sell_equipment 卖装备
     pub fn sell_equipment(&self) {
         //A出售 空格
         println!("卖装备");
-        _ = self.operate_instruction.on("a");
+        let _ = self.operate_instruction.on("a");
         thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(2000..3500)));
-        _ = self.operate_instruction.on("space");
+        let _ = self.operate_instruction.on("space");
         thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(2000..3500)));
-        _ = self.operate_instruction.on("left");
+        let _ = self.operate_instruction.on("left");
         thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(2000..3500)));
-        _ = self.operate_instruction.on("k_enter");
+        let _ = self.operate_instruction.on("k_enter");
     }
     // 移动到地图入口前
     pub fn mov_door(&self) {
